@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marel - Kitchensink Design System; MB Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:      #0c1214;
+      --coal:     #111c1f;
+      --slate:    #182428;
+      --ridge:    #1e2e32;
+      --electric: #4ecdc4;
+      --volt:     #7eddd8;
+      --ghost:    rgba(78,205,196,0.07);
+      --dim:      rgba(168,210,215,0.55);
+      --bright:   rgba(225,240,242,0.92);
+      --nav-w:    240px;
+      --nav-col:  72px;
+    }
+
+    html, body { height: 100%; background: var(--ink); color: var(--bright);
+      font-family: "Space Grotesk", sans-serif; overflow: hidden; -webkit-font-smoothing: antialiased; }
+
+    .shell { display: flex; height: 100vh; width: 100vw; overflow: hidden; }
+
+    /* ── NAV (identical to portfolio) ── */
+    nav {
+      width: var(--nav-w); flex-shrink: 0; background: var(--coal);
+      border-right: 1px solid rgba(78,205,196,0.15);
+      display: flex; flex-direction: column; padding: 2rem 0;
+      position: relative; z-index: 10;
+      transition: width 0.35s cubic-bezier(0.77,0,0.18,1);
+    }
+    nav.collapsed { width: var(--nav-col); }
+
+    .nav-logo { padding: 0 1.6rem 2.5rem; border-bottom: 1px solid rgba(78,205,196,0.1);
+      margin-bottom: 1.5rem; overflow: hidden; white-space: nowrap; }
+    .nav-logo .mark { font-family: "Space Mono", monospace; font-size: 1.1rem;
+      font-weight: 700; color: var(--electric); display: block; }
+    .nav-logo .sub { font-size: 0.68rem; font-weight: 300; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--dim); margin-top: 0.2rem; display: block;
+      transition: opacity 0.2s; }
+    nav.collapsed .nav-logo .sub { opacity: 0; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 0.85rem 1.6rem; cursor: pointer;
+      position: relative; overflow: hidden; white-space: nowrap;
+      border: none; background: none; width: 100%; text-align: left;
+      color: var(--dim); font-family: "Space Grotesk", sans-serif;
+      font-size: 0.88rem; transition: background 0.2s, color 0.2s; text-decoration: none;
+      display: flex;
+    }
+    .nav-item::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 2px; background: var(--electric); transform: scaleY(0); transition: transform 0.2s; }
+    .nav-item:hover, .nav-item.active { background: var(--ghost); color: var(--electric); }
+    .nav-item.active::before { transform: scaleY(1); }
+    .nav-item .icon { font-family: "Space Mono", monospace; font-size: 0.8rem;
+      color: var(--electric); flex-shrink: 0; width: 1.5rem; text-align: center; opacity: 0.65; }
+    .nav-item.active .icon { opacity: 1; }
+    .nav-label { transition: opacity 0.2s; }
+    nav.collapsed .nav-label { opacity: 0; pointer-events: none; }
+
+    .nav-toggle { padding: 1.2rem 1.6rem 0; border-top: 1px solid rgba(78,205,196,0.1); margin-top: auto; }
+    .toggle-btn { background: none; border: 1px solid rgba(78,205,196,0.25); color: var(--dim);
+      padding: 0.5rem 0.75rem; cursor: pointer; font-family: "Space Mono", monospace;
+      font-size: 0.75rem; transition: all 0.2s; width: 100%; }
+    .toggle-btn:hover { border-color: var(--electric); color: var(--electric); }
+
+    /* ── MAIN ── */
+    .main { flex: 1; overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; }
+    .main::-webkit-scrollbar { width: 4px; }
+    .main::-webkit-scrollbar-track { background: var(--coal); }
+    .main::-webkit-scrollbar-thumb { background: rgba(78,205,196,0.35); }
+
+    /* ── PROJECT HERO ── */
+    .proj-hero {
+      position: relative; height: 62vh; min-height: 420px;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      overflow: hidden;
+    }
+
+    .proj-hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background: linear-gradient(135deg, #0c1a20 0%, #0e2228 40%, #112830 70%, #0d1e24 100%);
+    }
+
+    /* Animated topographic lines */
+    .topo-svg { position: absolute; inset: 0; z-index: 1; opacity: 0.18; }
+
+    /* Scan lines */
+    .proj-hero::after {
+      content: ""; position: absolute; inset: 0; z-index: 2;
+      background: repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.1) 3px,rgba(0,0,0,0.1) 4px);
+      pointer-events: none;
+    }
+
+    /* Gradient fade bottom */
+    .proj-hero::before {
+      content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 55%;
+      background: linear-gradient(to bottom, transparent, var(--ink));
+      z-index: 3; pointer-events: none;
+    }
+
+    .proj-hero-content {
+      position: relative; z-index: 4;
+      padding: clamp(2rem,5vw,4rem);
+      padding-bottom: clamp(2.5rem,5vh,3.5rem);
+    }
+
+    /* Back breadcrumb */
+    .breadcrumb {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: "Space Mono", monospace; font-size: 0.68rem;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--dim); text-decoration: none;
+      margin-bottom: 1.75rem; transition: color 0.2s;
+    }
+    .breadcrumb:hover { color: var(--electric); }
+    .breadcrumb::before { content: "<"; font-size: 0.9rem; }
+
+    .proj-tags { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .proj-tag {
+      font-family: "Space Mono", monospace; font-size: 0.62rem;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      border: 1px solid rgba(78,205,196,0.35); color: var(--electric);
+      padding: 0.3rem 0.65rem;
+    }
+
+    .proj-title {
+      font-weight: 700; font-size: clamp(2.2rem,5vw,4rem);
+      line-height: 1.0; color: #fff; letter-spacing: -0.03em;
+      margin-bottom: 0.75rem;
+    }
+    .proj-title span { color: var(--electric); }
+
+    .proj-subtitle {
+      font-size: 1rem; font-weight: 300; color: var(--dim);
+      max-width: 520px; line-height: 1.6;
+    }
+
+    /* ── META BAR ── */
+    .meta-bar {
+      display: grid; grid-template-columns: repeat(4,1fr);
+      border-bottom: 1px solid rgba(78,205,196,0.1);
+      border-top: 1px solid rgba(78,205,196,0.1);
+    }
+    .meta-cell {
+      padding: 1.25rem clamp(1.5rem,3vw,2.5rem);
+      border-right: 1px solid rgba(78,205,196,0.1);
+    }
+    .meta-cell:last-child { border-right: none; }
+    .meta-key { font-family: "Space Mono", monospace; font-size: 0.6rem;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--electric);
+      margin-bottom: 0.35rem; opacity: 0.7; }
+    .meta-val { font-size: 0.88rem; font-weight: 500; color: var(--bright); }
+
+    /* ── BODY LAYOUT ── */
+    .proj-body {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 0;
+      align-items: start;
+    }
+
+    /* ── LEFT: PROSE ── */
+    .proj-prose { padding: clamp(2.5rem,5vw,4rem); border-right: 1px solid rgba(78,205,196,0.08); }
+
+    .section-label {
+      font-family: "Space Mono", monospace; font-size: 0.62rem;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--electric); margin-bottom: 0.9rem;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .section-label::before { content: ""; width: 16px; height: 1px; background: var(--electric); }
+
+    .proj-prose h2 {
+      font-size: clamp(1.5rem,2.5vw,2.2rem); font-weight: 700;
+      letter-spacing: -0.025em; color: #fff;
+      margin-bottom: 1.1rem; line-height: 1.15;
+    }
+
+    .proj-prose p {
+      font-size: 0.93rem; font-weight: 300; color: var(--dim);
+      line-height: 1.8; margin-bottom: 1.3rem;
+    }
+
+    .proj-prose p strong { color: var(--bright); font-weight: 500; }
+
+    .divider { border: none; border-top: 1px solid rgba(78,205,196,0.08); margin: 2.75rem 0; }
+
+    /* Mock screen */
+    .screen-mock {
+      background: var(--slate); border: 1px solid rgba(78,205,196,0.12);
+      margin: 2rem 0; overflow: hidden; position: relative;
+    }
+
+    .screen-mock-bar {
+      background: var(--ridge); padding: 0.6rem 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+      border-bottom: 1px solid rgba(78,205,196,0.1);
+    }
+    .dot-r { width: 8px; height: 8px; border-radius: 50%; background: rgba(78,205,196,0.25); }
+    .dot-r.active { background: var(--electric); }
+    .mock-url { font-family: "Space Mono", monospace; font-size: 0.65rem;
+      color: var(--dim); margin-left: 0.5rem; letter-spacing: 0.05em; }
+
+    .screen-mock-body { padding: 1.75rem; min-height: 200px; }
+
+    /* Inline mockup panels */
+    .mock-app {
+      display: grid; grid-template-columns: 160px 1fr; gap: 1px;
+      background: rgba(78,205,196,0.08); min-height: 260px;
+    }
+    .mock-sidebar-col { background: var(--coal); padding: 1rem; }
+    .mock-main-col { background: var(--slate); padding: 1.25rem; }
+    .mock-row { height: 10px; background: rgba(78,205,196,0.12); border-radius: 1px; margin-bottom: 0.6rem; }
+    .mock-row.accent { background: rgba(78,205,196,0.35); width: 60%; }
+    .mock-row.short { width: 55%; }
+    .mock-row.med { width: 75%; }
+    .mock-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem; }
+    .mock-card { background: var(--ridge); height: 70px; border: 1px solid rgba(78,205,196,0.1);
+      position: relative; overflow: hidden; }
+    .mock-card::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0;
+      height: 3px; background: rgba(78,205,196,0.3); }
+    .mock-card.highlight::after { background: var(--electric); }
+    .mock-stat-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.5rem; margin-bottom: 0.75rem; }
+    .mock-stat-block { background: var(--ridge); padding: 0.6rem; }
+    .mock-stat-num { font-family: "Space Mono", monospace; font-size: 1rem; color: var(--electric); }
+    .mock-stat-lbl { font-size: 0.55rem; color: var(--dim); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+
+    /* Process steps */
+    .process-track { position: relative; padding-left: 2.5rem; }
+    .process-track::before { content: ""; position: absolute; left: 0.55rem; top: 0.5rem; bottom: 0.5rem;
+      width: 1px; background: rgba(78,205,196,0.18); }
+    .process-step { position: relative; margin-bottom: 2rem; }
+    .process-step:last-child { margin-bottom: 0; }
+    .step-dot { position: absolute; left: -2.5rem; top: 0.2rem; width: 10px; height: 10px;
+      border-radius: 50%; border: 1px solid var(--electric); background: var(--ink); }
+    .process-step.done .step-dot { background: var(--electric); }
+    .step-title { font-family: "Space Mono", monospace; font-size: 0.72rem;
+      letter-spacing: 0.12em; text-transform: uppercase; color: var(--electric); margin-bottom: 0.4rem; }
+    .step-body { font-size: 0.85rem; color: var(--dim); line-height: 1.65; }
+
+    /* Outcome metric */
+    .outcome-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+      background: rgba(78,205,196,0.08); margin: 2rem 0; }
+    .outcome-cell { background: var(--slate); padding: 1.5rem; }
+    .outcome-num { font-family: "Space Mono", monospace; font-size: 2.2rem;
+      font-weight: 700; color: var(--electric); line-height: 1; margin-bottom: 0.4rem; }
+    .outcome-desc { font-size: 0.8rem; color: var(--dim); line-height: 1.5; }
+
+    /* Image placeholder */
+    .img-block {
+      width: 100%; margin: 2rem 0; overflow: hidden; position: relative;
+      background: var(--slate); border: 1px solid rgba(78,205,196,0.1);
+    }
+    .img-block canvas { display: block; width: 100%; }
+    .img-caption { padding: 0.75rem 1rem; font-family: "Space Mono", monospace;
+      font-size: 0.62rem; color: var(--dim); letter-spacing: 0.1em;
+      border-top: 1px solid rgba(78,205,196,0.08); }
+
+    /* Next project */
+    .next-project {
+      margin-top: 3rem; border-top: 1px solid rgba(78,205,196,0.1);
+      padding-top: 2.5rem; display: flex; align-items: center;
+      justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    }
+    .next-label { font-family: "Space Mono", monospace; font-size: 0.65rem;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); margin-bottom: 0.4rem; }
+    .next-title { font-size: 1.2rem; font-weight: 700; color: #fff; }
+    .next-arrow { font-family: "Space Mono", monospace; font-size: 1.5rem; color: var(--electric);
+      transition: transform 0.2s; cursor: pointer; }
+    .next-arrow:hover { transform: translateX(4px); }
+
+    /* ── RIGHT SIDEBAR ── */
+    .proj-sidebar { padding: clamp(2rem,4vw,3rem) 1.75rem; position: sticky; top: 0; }
+
+    .sidebar-block { margin-bottom: 2.25rem; }
+    .sidebar-block:last-child { margin-bottom: 0; }
+
+    .sb-label { font-family: "Space Mono", monospace; font-size: 0.6rem;
+      letter-spacing: 0.22em; text-transform: uppercase; color: var(--electric);
+      margin-bottom: 0.85rem; opacity: 0.8; }
+
+    .contrib-list { list-style: none; }
+    .contrib-list li { font-size: 0.83rem; color: var(--dim); padding: 0.4rem 0;
+      border-bottom: 1px solid rgba(78,205,196,0.06); line-height: 1.4; }
+    .contrib-list li:last-child { border-bottom: none; }
+    .contrib-list strong { color: var(--bright); font-weight: 500; display: block; font-size: 0.8rem; }
+
+    .tool-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .tool-chip { font-family: "Space Mono", monospace; font-size: 0.6rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      border: 1px solid rgba(78,205,196,0.18); color: rgba(78,205,196,0.7);
+      padding: 0.3rem 0.55rem; transition: all 0.2s; cursor: default; }
+    .tool-chip:hover { border-color: var(--electric); color: var(--electric); }
+
+    .toc-list { list-style: none; }
+    .toc-list li { margin-bottom: 0.4rem; }
+    .toc-list a { font-size: 0.8rem; color: var(--dim); text-decoration: none;
+      transition: color 0.2s; display: flex; align-items: center; gap: 0.4rem; }
+    .toc-list a::before { content: ""; width: 6px; height: 1px;
+      background: rgba(78,205,196,0.35); flex-shrink: 0; }
+    .toc-list a:hover { color: var(--electric); }
+    .toc-list a.active { color: var(--electric); }
+    .toc-list a.active::before { background: var(--electric); width: 10px; }
+
+    /* cursor */
+    .cursor-glow { position: fixed; width: 320px; height: 320px; border-radius: 50%;
+      background: radial-gradient(circle,rgba(78,205,196,0.06) 0%,transparent 70%);
+      pointer-events: none; transform: translate(-50%,-50%); z-index: 9999; }
+
+    @media (max-width: 960px) {
+      .proj-body { grid-template-columns: 1fr; }
+      .proj-sidebar { position: static; border-top: 1px solid rgba(78,205,196,0.08); }
+      .proj-prose { border-right: none; }
+      nav { width: var(--nav-col) !important; }
+      .nav-label, .nav-logo .sub { opacity: 0 !important; pointer-events: none; }
+      .meta-bar { grid-template-columns: 1fr 1fr; }
+      .meta-cell:nth-child(2) { border-right: none; }
+    }
+
+    @media (max-width: 500px) {
+      .meta-bar { grid-template-columns: 1fr; }
+      .meta-cell { border-right: none; }
+      .outcome-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cursor-glow" id="glow"></div>
+
+<div class="shell">
+
+  <!-- NAV -->
+ <!-- <nav id="nav">
+    <div class="nav-logo">
+      <span class="mark">MB/</span>
+      <span class="sub">UX/UI Portfolio</span>
+    </div>
+    <div class="nav-items">
+      <a class="nav-item" href="../index.html">
+        <span class="icon">[~]</span><span class="nav-label">Home</span>
+      </a>
+      <a class="nav-item active" href="../index.html">
+        <span class="icon">[#]</span><span class="nav-label">Work</span>
+      </a>
+      <a class="nav-item" href="../index.html">
+        <span class="icon">[?]</span><span class="nav-label">About</span>
+      </a>
+      <a class="nav-item" href="../index.html">
+        <span class="icon">[@]</span><span class="nav-label">Contact</span>
+      </a>
+    </div>
+    <div class="nav-toggle">
+      <button class="toggle-btn" id="navToggle">&#171;</button>
+    </div>
+  </nav>
+-->
+  <!-- MAIN -->
+  <main class="main" id="main">
+
+    <!-- HERO -->
+    <div class="proj-hero">
+      <div class="proj-hero-bg"></div>
+      <svg class="topo-svg" viewBox="0 0 1200 500" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <g fill="none" stroke="#4ecdc4" stroke-width="1">
+          <path d="M-100,400 C100,380 200,320 400,310 C600,300 700,340 900,330 C1100,320 1200,360 1400,350"/>
+          <path d="M-100,360 C150,340 250,275 450,265 C650,255 760,300 950,288 C1140,276 1250,315 1400,305"/>
+          <path d="M-100,320 C200,298 310,230 510,218 C710,206 820,258 1010,245 C1180,233 1280,268 1400,260"/>
+          <path d="M-100,280 C250,256 360,185 560,172 C760,159 870,215 1060,202 C1230,190 1320,222 1400,215"/>
+          <path d="M-100,240 C300,213 420,138 620,124 C820,110 940,172 1120,158 C1280,146 1360,175 1400,170"/>
+          <path d="M-100,200 C350,170 480,90 680,76 C880,62 1000,130 1170,115 C1310,102 1380,128 1400,124"/>
+          <path d="M-100,160 C400,127 540,42 740,28 C940,14 1060,86 1220,70 C1340,58 1390,80 1400,78"/>
+          <path d="M-100,440 C80,425 170,375 370,366 C570,357 660,390 860,382 C1060,374 1150,402 1400,396"/>
+          <path d="M200,480 C350,470 440,445 580,440 C720,435 810,455 950,450 C1090,445 1180,462 1400,458"/>
+        </g>
+        <!-- Highlight a peak zone -->
+        <circle cx="680" cy="76" r="3" fill="#4ecdc4" opacity="0.6"/>
+        <circle cx="740" cy="28" r="2" fill="#4ecdc4" opacity="0.4"/>
+        <line x1="680" y1="76" x2="680" y2="500" stroke="#4ecdc4" stroke-width="0.5" stroke-dasharray="4 6" opacity="0.3"/>
+      </svg>
+      <div class="proj-hero-content">
+        <a class="breadcrumb" href="../index.html">Home</a>
+        <div class="proj-tags">
+          <span class="proj-tag">Design Systems</span>
+          <span class="proj-tag">UX/UI Design</span>
+          <span class="proj-tag">2018</span>
+        </div>
+        <h1 class="proj-title">Kitchensink Design System &mdash; <span>UX/UI Design</span></h1>
+        <p class="proj-subtitle">To support the redevelopment of Marel's software product line, a design system was created to ensure consistency and interaction standards across multiple platforms. </p>
+      </div>
+    </div>
+
+    <!-- META BAR -->
+    <div class="meta-bar">
+      <div class="meta-cell"><div class="meta-key">Client</div><div class="meta-val">Marel Innova</div></div>
+      <div class="meta-cell"><div class="meta-key">Timeline</div><div class="meta-val">1 year &middot; 2022&ndash;2023</div></div>
+      <div class="meta-cell"><div class="meta-key">My role</div><div class="meta-val">Lead UX &amp; Product Design</div></div>
+      <div class="meta-cell"><div class="meta-key">Deliverables</div><div class="meta-val">Components, Patterns, Documentation</div></div>
+    </div>
+
+    <!-- BODY -->
+    <div class="proj-body">
+
+      <!-- PROSE -->
+      <div class="proj-prose">
+
+        <!-- OVERVIEW -->
+        <section id="overview">
+          <p class="section-label">Overview</p>
+          <h2>Design thinking.</h2>
+          <p>A culture of procedure and cascading steps predominated in design at Marel and in order to alter the field, I encouraged teams to begin thinking in collaborative design. This required a single design language which all could agree on. A design system, named Kitchensink, was begun and grew steadily over the 9 years I was at Marel.</p>
+          <p>The system comprised of major building blocks, including colour, fonts, spacing, variables, icons, layouts and a large number of components. The bulk of the work was done in Figma and Zeroheight was used for documentation.</p>
+
+          <div class="img-block" align="center">
+            <img src="../images/IDGColour.png" width="70%">
+            <img src="../images/IDGButtonGroups.png" width="70%">
+            <img src="../images/IDGFormFields.png" width="70%">
+            <div class="img-caption">Samples of Kitchensink's design documentation.</div>
+          </div>
+
+
+        </section>
+
+        <hr class="divider" />
+
+       <!-- RESEARCH -->
+        <!--         <section id="research">
+          <p class="section-label">Research</p>
+          <h2>Six days in the field</h2>
+          <p>Before opening Figma, I undertook 3 international research trips aimed at understanding the various types of users in the 3 main industries Marel supports. I documented existing workflows with contextual inquiry, observed 5 production managers, 7 technicians, 9 floor workers, 3 office workers and 1 top management individual in situ, and identified a range of failure points in the way they used Innova in its form.</p>
+          <p>The most critical insight: <strong>Food processing workers were spending too much time navigating rather than viewing key takaways.</strong>. The ability to customise the interface with modules was already an established working method but the interface did not provide the user with the ability to accomplish this themselves. The waste of time to the worker, the support teams and Marel was significant. </p>
+
+          <div class="img-block">
+            <img src="../images/InnovaFrancois.png" width="100%">
+            <div class="img-caption">An presentation panel derived from researching a particular type of Innova user.</div>
+          </div>
+
+          <p>Key research findings surfaced three design mandates: motivationally driven customised interfaces; menus that did not interfere with available space; a simplified hierarchical structure.</p>
+        </section>-->
+
+        <hr class="divider" />
+
+        <!-- PROCESS -->
+        <section id="process">
+          <p class="section-label">Design Process</p>
+          <h2>Components that work</h2>
+          <p>The design language of Kitchensink was chose for clarity, reusability and high contrast environments. Factory lighting is often poor so components had to be optimized for visual acuity. Research into many design systems and how they operated was key to finding a unique Marel solution.</p>
+
+          <div class="process-track">
+            <div class="process-step done">
+              <div class="step-dot"></div>
+              <div class="step-title">Discovery</div>
+              <div class="step-body">Comparing various system components from Material Design, Microsoft's Fluent, Atlassian, Orbit amongst others led to a full component list which was then reduced to the set most common to Innova's needs.</div>
+            </div>
+            
+            <div class="process-step done">
+              <div class="step-dot"></div>
+              <div class="step-title">Guidance</div>
+              <div class="step-body">Many discussions between members of the UX team led to a series of agreed upon practices for component building and the procedures around adding new items. As a member of the team, it was up to me to guide the feature set for each component and create the first mockups.</div>
+            </div>
+            <div class="process-step done">
+              <div class="step-dot"></div>
+              <div class="step-title">Documentation</div>
+              <div class="step-body">Using Zeroheight in collaboration with Figma, we were able to create a space where developers could download components for use in their coding environments. The ability of Zeroheight to collect components into libraries sped up development and consistency greatly.</div>
+            </div>
+          </div>
+        </section>
+
+        <hr class="divider" />
+
+        <!-- OUTCOMES -->
+        <section id="outcomes">
+          <p class="section-label">Outcomes</p>
+          <h2>A fully modular system</h2>
+          <p>After a year of development, the Kitchensink system was in use by all developers and designers. New products were created with greater efficiency and speed. The personality of Marel Innova began to take on a more consistent feel and users appreciated it's sleeker look.</p>
+
+
+            <div class="img-block" align="center">
+            <img src="../images/Kitchsinkcomponent.jpg" width="90%" />
+            <div class="img-caption">Component examples from Kitchensink.</div>
+
+          </div>
+
+        </section>
+
+        <!-- NEXT PROJECT -->
+        <div class="next-project">
+          <div>
+            <div class="next-label">Next project</div>
+            <div class="next-title"><a href="portfolio-marelchillerlogistics.html" class="next-title">Marel Chiller Logistics</a></div>
+          </div>
+          <span class="next-arrow">&#8594;</span>
+        </div>
+
+      </div>
+
+      <!-- SIDEBAR -->
+      <aside class="proj-sidebar">
+
+        <div class="sidebar-block">
+          <div class="sb-label">On this page</div>
+          <ul class="toc-list">
+            <li><a href="#overview" class="active">Overview</a></li>
+            <li><a href="#process">Design process</a></li>
+            <li><a href="#outcomes">Outcomes</a></li>
+          </ul>
+        </div>
+
+        <div class="sidebar-block">
+          <div class="sb-label">Team</div>
+          <ul class="contrib-list">
+            <li><strong>Mark Berge</strong>Lead UX &amp; Product Design</li>
+            <li><strong>Eline Jansen</strong>UX Designer</li>
+          </ul>
+        </div>
+
+        <div class="sidebar-block">
+          <div class="sb-label">Tools</div>
+          <div class="tool-chips">
+            <span class="tool-chip">Figma</span>
+          </div>
+        </div>
+
+        <div class="sidebar-block">
+          <div class="sb-label">Disciplines</div>
+          <div class="tool-chips">
+            <span class="tool-chip">UX Research</span>
+            <span class="tool-chip">UX design</span>
+            <span class="tool-chip">Prototyping</span>
+
+          </div>
+        </div>
+
+      </aside>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // Nav collapse
+  const nav = document.getElementById("nav");
+  const toggleBtn = document.getElementById("navToggle");
+  let collapsed = false;
+  toggleBtn.addEventListener("click", () => {
+    collapsed = !collapsed;
+    nav.classList.toggle("collapsed", collapsed);
+    toggleBtn.textContent = collapsed ? "\u00BB" : "\u00AB";
+  });
+
+  // Cursor glow
+  const glow = document.getElementById("glow");
+  document.addEventListener("mousemove", e => {
+    glow.style.left = e.clientX + "px";
+    glow.style.top  = e.clientY + "px";
+  });
+
+  // Sidebar TOC active on scroll
+  const sections = ["overview","research","process","outcomes"];
+  const main = document.getElementById("main");
+  main.addEventListener("scroll", () => {
+    let current = sections[0];
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top < 160) current = id;
+    });
+    document.querySelectorAll(".toc-list a").forEach(a => {
+      a.classList.toggle("active", a.getAttribute("href") === "#" + current);
+    });
+  });
+
+  
+    // Label for active point
+    ctx.fillStyle = "#4ecdc4";
+    ctx.font = "600 9px Space Mono, monospace";
+    ctx.fillText("S-047", pts[2][0]+10, pts[2][1]+4);
+  }
+</script>
+</body>
+</html>
